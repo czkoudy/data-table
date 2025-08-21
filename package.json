@@ -79,11 +79,13 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
       "require": "./dist/index.umd.js"
-    }
+    },
+    "./style.css": "./dist/index.css"
   },
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
+  "style": "./dist/index.css",
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
