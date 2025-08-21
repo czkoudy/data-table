@@ -15,6 +15,9 @@
     "DataGrid",
     "Pagination"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
