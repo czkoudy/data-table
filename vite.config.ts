@@ -11,8 +11,6 @@ export default defineConfig(async () => {
 
   return {
     build: {
-      // This ensures CSS is extracted
-      cssCodeSplit: false,
       emptyOutDir: true,
       lib: {
         entry: path.resolve(__dirname, './src/lib/index.ts'),
