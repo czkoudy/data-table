@@ -1,69 +1,132 @@
-# React + TypeScript + Vite
+# @czkoudy/data-table
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fully-featured, headless, and highly customizable React data table component built with [@tanstack/react-table](https://tanstack.com/table/v8) and styled using [Tailwind CSS](https://tailwindcss.com/). Supports sorting, filtering, grouping, pagination, row selection, and more.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🧩 **TypeScript** support
+- 🎨 **Tailwind CSS** styling (no external CSS required)
+- 🔍 **Column and global filtering**
+- ↕️ **Sorting**
+- 📊 **Grouping**
+- ⏩ **Pagination**
+- ✅ **Row selection**
+- 🕹️ **Imperative API** (clear selection)
+- 🗂️ **Custom cell rendering**
+- 🏷️ **Value label mapping**
+- 🕒 **Date formatting**
+- ⚡ **Fast and lightweight**
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install @czkoudy/data-table @tanstack/react-table date-fns
+# or
+pnpm add @czkoudy/data-table @tanstack/react-table date-fns
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> **Note:** `react`, `react-dom`, `@tanstack/react-table`, and `date-fns` are peer dependencies.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Usage
 
-export default tseslint.config([
-  globalIgnores(['dist']),
+```tsx
+import DataTable, { DataTableProps, DataTableRef } from '@czkoudy/data-table';
+
+const columns = [
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
+    accessorKey: 'name',
+    header: 'Name',
+    meta: { align: 'left' },
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Created At',
+    meta: { type: 'date', align: 'center', fallback: 'N/A' },
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    meta: {
+      valueLabelMap: {
+        active: '🟢 Active',
+        inactive: '🔴 Inactive',
+        falsy: 'Unknown',
       },
-      // other options...
+      align: 'center',
     },
   },
-])
+];
+
+const data = [
+  { name: 'Alice', createdAt: '2024-06-01T10:00:00Z', status: 'active' },
+  { name: 'Bob', createdAt: null, status: 'inactive' },
+];
+
+function App() {
+  return (
+    <DataTable
+      columns={columns}
+      data={data}
+      enableSearch
+      enableSorting
+      enablePagination
+      showRowSelectors
+      pageSize={10}
+      loading={false}
+      onRowClick={(row) => alert(`Clicked: ${row.name}`)}
+    />
+  );
+}
 ```
+
+## Props
+
+See [DataTableProps](./src/lib/DataTable.tsx) for full API.
+
+| Prop               | Type                       | Description                   |
+| ------------------ | -------------------------- | ----------------------------- |
+| `columns`          | `ColumnDef<T, any, any>[]` | Table columns definition      |
+| `data`             | `T[]`                      | Table data                    |
+| `enableSearch`     | `boolean`                  | Show global search input      |
+| `enableSorting`    | `boolean`                  | Enable sorting                |
+| `enablePagination` | `boolean`                  | Enable pagination             |
+| `showRowSelectors` | `boolean`                  | Show row selection checkboxes |
+| `onRowClick`       | `(row: T) => void`         | Row click handler             |
+| ...                | ...                        | See source for more options   |
+
+## Column Meta
+
+You can pass a `meta` object to each column for advanced features:
+
+```ts
+meta: {
+  align: 'left' | 'center' | 'right',
+  type: 'date', // enables date formatting
+  fallback: '-', // fallback for invalid dates
+  valueLabelMap: { [key: string]: string }, // custom value labels
+  filterValueExcludeList: string[], // exclude values from filter
+  filterValueIncludeList: string[], // include only these values in filter
+  disableRowClick: boolean, // disables row click for this column
+}
+```
+
+## Imperative API
+
+You can use a ref to clear row selection:
+
+```tsx
+const tableRef = useRef<DataTableRef>(null);
+
+<DataTable ref={tableRef} ... />
+
+// Clear selection
+tableRef.current?.clearSelection();
+```
+
+## License
+
+MIT
+
+## Contributing
+
+PRs and issues welcome! See [GitHub repo](https://github.com/czkoudy/data-table).
