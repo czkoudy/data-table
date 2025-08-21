@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/czkoudy/data-table/compare/v1.0.8...v1.0.9) (2025-08-21)
+
+
+### Bug Fixes
+
+* 🐛 one more try ([ed095cd](https://github.com/czkoudy/data-table/commit/ed095cd8f6f84e793381b3e78f662209d3c079eb))
+
 ## [1.0.8](https://github.com/czkoudy/data-table/compare/v1.0.7...v1.0.8) (2025-08-21)
 
 
