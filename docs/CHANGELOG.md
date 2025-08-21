@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/czkoudy/data-table/compare/v1.0.3...v1.0.4) (2025-08-21)
+
+
+### Bug Fixes
+
+* 🐛 fix issue with types declaration ([55bd5d9](https://github.com/czkoudy/data-table/commit/55bd5d9f97b0fedb9ff0132448aef44d3412a98e))
+
 ## [1.0.3](https://github.com/czkoudy/data-table/compare/v1.0.2...v1.0.3) (2025-08-21)
 
 
