@@ -25,7 +25,7 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
     return Array.from(values.keys()).sort();
   }, [column]);
 
-  // Support valueLabelMap for custom labels
+  // Support valueLabelMap for custom labelsfw
   const valueLabelMap: Record<string, string> | undefined =
     column.columnDef?.meta?.valueLabelMap;
   const filterValueExcludeList: string[] =
