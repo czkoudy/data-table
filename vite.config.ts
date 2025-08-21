@@ -5,6 +5,7 @@ import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   build: {
@@ -25,7 +26,14 @@ export default defineConfig({
     },
     sourcemap: true,
   },
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    dts({
+      include: ['src/lib/**/*'],
+      insertTypesEntry: true,
+    }),
+    tailwindcss(),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
