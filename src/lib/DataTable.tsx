@@ -16,8 +16,6 @@ import {
 import { format } from 'date-fns';
 import React, { useImperativeHandle, forwardRef } from 'react';
 
-import './index.css'; // Import your CSS styles
-
 // Column Filter Component
 function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
   const columnFilterValue = column.getFilterValue() as string[] | undefined;
