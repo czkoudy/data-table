@@ -11,6 +11,8 @@ export default defineConfig(async () => {
 
   return {
     build: {
+      // This ensures CSS is extracted
+      cssCodeSplit: false,
       emptyOutDir: true,
       lib: {
         entry: path.resolve(__dirname, './src/lib/index.ts'),
@@ -20,6 +22,12 @@ export default defineConfig(async () => {
       rollupOptions: {
         external: ['react', 'react-dom'],
         output: {
+          assetFileNames: (assetInfo) => {
+            if (assetInfo.name?.endsWith('.css')) {
+              return 'index.css';
+            }
+            return assetInfo.name || '';
+          },
           globals: {
             react: 'React',
             'react-dom': 'ReactDOM',
