@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/czkoudy/data-table/compare/v1.0.7...v1.0.8) (2025-08-21)
+
+
+### Bug Fixes
+
+* 🐛 last try of fixing tailwind for today ;-) ([49e9b6b](https://github.com/czkoudy/data-table/commit/49e9b6bed2580f93acd52fa9d259f88758d74557))
+
 ## [1.0.7](https://github.com/czkoudy/data-table/compare/v1.0.6...v1.0.7) (2025-08-21)
 
 
