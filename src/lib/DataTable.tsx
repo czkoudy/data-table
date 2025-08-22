@@ -16,6 +16,8 @@ import {
 import { format } from 'date-fns';
 import React, { useImperativeHandle, forwardRef } from 'react';
 
+import './DataTable.css';
+
 // Column Filter Component
 function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
   const columnFilterValue = column.getFilterValue() as string[] | undefined;
@@ -25,7 +27,6 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
     return Array.from(values.keys()).sort();
   }, [column]);
 
-  // Support valueLabelMap for custom labels
   const valueLabelMap: Record<string, string> | undefined =
     column.columnDef?.meta?.valueLabelMap;
   const filterValueExcludeList: string[] =
@@ -59,10 +60,8 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
 
   const handleSelectAll = () => {
     if (columnFilterValue?.length === filteredUniqueValues.length) {
-      // Deselect all - set to undefined to show all items
       column.setFilterValue(undefined);
     } else {
-      // Select all - set to all available values
       column.setFilterValue(filteredUniqueValues.map(String));
     }
   };
@@ -73,7 +72,7 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
   return (
     <div className="relative">
       <button
-        className="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-left flex items-center justify-between"
+        className="DataTable-filterButton"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>
@@ -83,23 +82,22 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
               ? 'All'
               : `${selectedCount} selected`}
         </span>
-        <span className="ml-1">▼</span>
+        <span style={{ marginLeft: 4 }}>▼</span>
       </button>
 
       {isOpen && (
         <>
-          {/* Backdrop to close dropdown when clicking outside */}
           <div
-            className="fixed inset-0 z-40"
+            className="DataTable-filterBackdrop"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded shadow-lg max-h-48 overflow-y-auto min-w-max">
-            <div className="p-2 border-b border-gray-200">
-              <label className="flex items-center text-xs font-medium whitespace-nowrap">
+          <div className="DataTable-filterDropdown">
+            <div className="DataTable-filterDropdownHeader">
+              <label className="DataTable-filterDropdownLabel">
                 <input
                   checked={selectedCount === totalCount}
-                  className="mr-2"
                   onChange={handleSelectAll}
+                  style={{ marginRight: 8 }}
                   type="checkbox"
                 />
                 Select All
@@ -107,18 +105,17 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
             </div>
             {filteredUniqueValues.map((value) => (
               <label
-                className="flex items-center p-2 text-xs hover:bg-gray-50 cursor-pointer whitespace-nowrap"
+                className="DataTable-filterDropdownOption"
                 key={String(value)}
               >
                 <input
                   checked={columnFilterValue?.includes(String(value)) || false}
-                  className="mr-2"
                   onChange={(e) =>
                     handleFilterChange(String(value), e.target.checked)
                   }
+                  style={{ marginRight: 8 }}
                   type="checkbox"
                 />
-                {/* Use custom label if available */}
                 {valueLabelMap && valueLabelMap[String(value)]
                   ? valueLabelMap[String(value)]
                   : String(value)}
@@ -210,7 +207,6 @@ const DataTableInner = <T,>(
     Record<string, boolean>
   >({});
 
-  // Update page size when data changes and pageSize is 'all'
   React.useEffect(() => {
     if (pageSize === 'all' && data?.length) {
       setPagination((prev) => ({
@@ -241,9 +237,7 @@ const DataTableInner = <T,>(
       getPaginationRowModel: getPaginationRowModel(),
       onPaginationChange: setPagination,
     }),
-    // Enable toggle sorting only between asc and desc
     enableSortingRemoval: false,
-    // Custom filter function for multiple selections
     filterFns: {
       multiSelect: (row, columnId, filterValue) => {
         if (!filterValue || filterValue.length === 0) return true;
@@ -252,7 +246,6 @@ const DataTableInner = <T,>(
       },
     },
     onExpandedChange: setExpanded,
-    // Set default filter function for column filters
     ...(enableColumnFilters && {
       defaultColumn: {
         filterFn: 'multiSelect',
@@ -290,7 +283,6 @@ const DataTableInner = <T,>(
     },
   });
 
-  // Compute selected rows
   const selectedRows = React.useMemo(() => {
     return table
       .getRowModel()
@@ -298,14 +290,12 @@ const DataTableInner = <T,>(
       .map((row) => row.original);
   }, [selectedRowIds, table]);
 
-  // Notify parent if callback provided
   React.useEffect(() => {
     if (onSelectionChange) {
       onSelectionChange(selectedRows);
     }
   }, [selectedRows, onSelectionChange]);
 
-  // Select all visible rows
   const allVisibleRows = table.getRowModel().rows;
   const allSelected =
     allVisibleRows.length > 0 &&
@@ -319,7 +309,6 @@ const DataTableInner = <T,>(
       newSelected[row.id] = checked;
     });
     if (!checked) {
-      // Remove unselected
       allVisibleRows.forEach((row) => {
         delete newSelected[row.id];
       });
@@ -356,22 +345,20 @@ const DataTableInner = <T,>(
   );
 
   return (
-    <div className={`data-table-wrapper relative ${className}`}>
-      {/* Loading Overlay */}
+    <div className={`DataTable-wrapper ${className}`}>
       {loading && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-          <div className="flex flex-col items-center space-y-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="text-sm text-gray-600">Loading...</span>
+        <div className="DataTable-loadingOverlay">
+          <div className="DataTable-loadingContent">
+            <div className="DataTable-loadingSpinner"></div>
+            <span className="DataTable-loadingText">Loading...</span>
           </div>
         </div>
       )}
 
-      {/* Global Filter */}
       {enableSearch && (
-        <div className="mb-4">
+        <div className="DataTable-globalFilterWrapper">
           <input
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="DataTable-globalFilterInput"
             onChange={(e) => table.setGlobalFilter(e.target.value)}
             placeholder="Search all columns..."
             type="text"
@@ -379,8 +366,7 @@ const DataTableInner = <T,>(
         </div>
       )}
 
-      {/* Table */}
-      <table className={`table table-sm ${tableClassName}`}>
+      <table className={`DataTable-table ${tableClassName}`}>
         <thead>
           {table.getHeaderGroups().map((headerGroup, headerGroupIdx) => (
             <tr key={headerGroup.id}>
@@ -391,21 +377,20 @@ const DataTableInner = <T,>(
                 />
               )}
               {headerGroup.headers.map((header) => {
-                // Get alignment from column meta, default to left
                 const align =
                   (header.column.columnDef.meta as DataTableColumnMeta)
                     ?.align || 'left';
                 let alignClass = '';
                 let flexJustify = '';
                 if (align === 'center') {
-                  alignClass = 'text-center';
-                  flexJustify = 'justify-center';
+                  alignClass = 'DataTable-alignCenter';
+                  flexJustify = 'DataTable-justifyCenter';
                 } else if (align === 'right') {
-                  alignClass = 'text-right';
-                  flexJustify = 'justify-end';
+                  alignClass = 'DataTable-alignRight';
+                  flexJustify = 'DataTable-justifyEnd';
                 } else {
-                  alignClass = 'text-left';
-                  flexJustify = 'justify-start';
+                  alignClass = 'DataTable-alignLeft';
+                  flexJustify = 'DataTable-justifyStart';
                 }
                 return (
                   <th
@@ -422,9 +407,9 @@ const DataTableInner = <T,>(
                   >
                     {header.isPlaceholder ? null : (
                       <div
-                        className={`flex items-center space-x-1 ${flexJustify} ${
+                        className={`DataTable-headerCell ${flexJustify} ${
                           header.column.getCanSort()
-                            ? 'cursor-pointer select-none'
+                            ? 'DataTable-headerCellSortable'
                             : ''
                         }`}
                         onClick={header.column.getToggleSortingHandler()}
@@ -436,7 +421,7 @@ const DataTableInner = <T,>(
                           )}
                         </span>
                         {enableSorting && header.column.getCanSort() && (
-                          <span className="text-gray-400">
+                          <span className="DataTable-headerSortIcon">
                             {{
                               asc: ' 🔼',
                               desc: ' 🔽',
@@ -450,7 +435,6 @@ const DataTableInner = <T,>(
               })}
             </tr>
           ))}
-          {/* Column Filters Row */}
           {enableColumnFilters && (
             <tr>
               {showRowSelectors && (
@@ -461,7 +445,10 @@ const DataTableInner = <T,>(
               )}
               {table.getHeaderGroups()[0]?.headers.map((header) => {
                 return (
-                  <th className="p-2" key={`filter-${header.id}`}>
+                  <th
+                    className="DataTable-filterRowCell"
+                    key={`filter-${header.id}`}
+                  >
                     {header.column.getCanFilter() &&
                     header.column.columnDef.enableColumnFilter !== false ? (
                       <ColumnFilter column={header.column} />
@@ -475,7 +462,6 @@ const DataTableInner = <T,>(
         <tbody>
           {table.getRowModel().rows.map((row, index) => {
             if (row.getIsGrouped()) {
-              // Only group if the group value is not undefined/null/empty string
               const groupValue = row.groupingColumnId
                 ? row.getValue(row.groupingColumnId)
                 : undefined;
@@ -484,13 +470,11 @@ const DataTableInner = <T,>(
                 groupValue === null ||
                 groupValue === ''
               ) {
-                // Render subRows as normal rows (not grouped)
                 return row.subRows.map((subRow, subIdx) => (
                   <tr
-                    className={`hover:bg-gray-50 ${getRowClassName ? getRowClassName(subRow.original, subIdx) : ''}`}
+                    className={`DataTable-row ${getRowClassName ? getRowClassName(subRow.original, subIdx) : ''}`}
                     key={subRow.id}
                     onClick={(e) => {
-                      // Prevent row click if the event target is inside a cell with disableRowClick
                       const cellElements = Array.from(
                         (e.currentTarget as HTMLTableRowElement).children
                       );
@@ -502,7 +486,7 @@ const DataTableInner = <T,>(
                           (colDef?.meta as DataTableColumnMeta)?.disableRowClick
                         ) {
                           if (cell.contains(e.target as Node)) {
-                            return; // Do not fire row click
+                            return;
                           }
                         }
                       }
@@ -548,7 +532,6 @@ const DataTableInner = <T,>(
                           rawValue === null ||
                           rawValue === ''
                         ) {
-                          key = 'falsy';
                         }
                         if (valueLabelMap[key] !== undefined) {
                           displayValue = valueLabelMap[key];
@@ -556,7 +539,7 @@ const DataTableInner = <T,>(
                       }
                       return (
                         <td
-                          className="overflow-hidden text-ellipsis "
+                          className="DataTable-cell"
                           key={cell.id}
                           style={{
                             maxWidth:
@@ -574,7 +557,7 @@ const DataTableInner = <T,>(
                           }}
                           title={String(cell.getValue() || '')}
                         >
-                          <span className="truncate text-sm">
+                          <span className="DataTable-cellText">
                             {displayValue}
                           </span>
                         </td>
@@ -583,19 +566,20 @@ const DataTableInner = <T,>(
                   </tr>
                 ));
               }
-              // ...existing code for grouped row...
               const isExpanded = row.getIsExpanded();
               return (
                 <React.Fragment key={row.id}>
                   <tr
-                    className="bg-gray-100 font-bold cursor-pointer"
+                    className="DataTable-row DataTable-groupedRow"
                     onClick={() => row.toggleExpanded()}
                   >
                     <td
-                      className="pl-4"
+                      className="DataTable-groupedRowCell"
                       colSpan={row.getVisibleCells().length + 1}
                     >
-                      <span className="mr-2">{isExpanded ? '▼' : '▶'}</span>
+                      <span className="DataTable-groupedRowIcon">
+                        {isExpanded ? '▼' : '▶'}
+                      </span>
                       {row.groupingColumnId
                         ? `${row.groupingColumnId}: ${row.getValue(row.groupingColumnId)}`
                         : 'Group'}{' '}
@@ -606,10 +590,9 @@ const DataTableInner = <T,>(
                     row.subRows.map((subRow, subIdx) =>
                       subRow.getIsGrouped() ? null : (
                         <tr
-                          className={`hover:bg-gray-50 ${getRowClassName ? getRowClassName(subRow.original, subIdx) : ''}`}
+                          className={`DataTable-row ${getRowClassName ? getRowClassName(subRow.original, subIdx) : ''}`}
                           key={subRow.id}
                           onClick={(e) => {
-                            // Prevent row click if the event target is inside a cell with disableRowClick
                             const cellElements = Array.from(
                               (e.currentTarget as HTMLTableRowElement).children
                             );
@@ -624,7 +607,7 @@ const DataTableInner = <T,>(
                                   ?.disableRowClick
                               ) {
                                 if (cell.contains(e.target as Node)) {
-                                  return; // Do not fire row click
+                                  return;
                                 }
                               }
                             }
@@ -678,7 +661,7 @@ const DataTableInner = <T,>(
                             }
                             return (
                               <td
-                                className="overflow-hidden text-ellipsis "
+                                className="DataTable-cell"
                                 key={cell.id}
                                 style={{
                                   maxWidth:
@@ -696,7 +679,7 @@ const DataTableInner = <T,>(
                                 }}
                                 title={String(cell.getValue() || '')}
                               >
-                                <span className="truncate text-sm">
+                                <span className="DataTable-cellText">
                                   {displayValue}
                                 </span>
                               </td>
@@ -708,13 +691,11 @@ const DataTableInner = <T,>(
                 </React.Fragment>
               );
             }
-            // ...existing code for normal rows...
             return (
               <tr
-                className={`hover:bg-gray-50 ${selectedRowIds[row.id] ? 'bg-blue-50' : ''} ${getRowClassName ? getRowClassName(row.original, index) : ''}`}
+                className={`DataTable-row ${selectedRowIds[row.id] ? 'DataTable-rowSelected' : ''} ${getRowClassName ? getRowClassName(row.original, index) : ''}`}
                 key={row.id}
                 onClick={(e) => {
-                  // Prevent row click if the event target is inside a cell with disableRowClick or the first cell (checkbox)
                   const cellElements = Array.from(
                     (e.currentTarget as HTMLTableRowElement).children
                   );
@@ -722,7 +703,6 @@ const DataTableInner = <T,>(
                     const cell = cellElements[i] as HTMLTableCellElement;
                     let colDef;
                     if (i === 0) {
-                      // Always check the first visible cell's column meta for disableRowClick
                       const firstCell = row.getVisibleCells()[0];
                       colDef = firstCell?.column?.columnDef;
                     } else {
@@ -733,7 +713,7 @@ const DataTableInner = <T,>(
                       cell.getAttribute('data-disable-row-click') === 'true'
                     ) {
                       if (cell.contains(e.target as Node)) {
-                        return; // Do not fire row click
+                        return;
                       }
                     }
                   }
@@ -763,7 +743,6 @@ const DataTableInner = <T,>(
                   const colDef = cell.column.columnDef;
                   const valueLabelMap = (colDef?.meta as DataTableColumnMeta)
                     ?.valueLabelMap;
-                  // --- Date formatting logic ---
                   let displayValue = flexRender(colDef.cell, cell.getContext());
                   if ((colDef?.meta as DataTableColumnMeta)?.type === 'date') {
                     const fallback =
@@ -794,7 +773,6 @@ const DataTableInner = <T,>(
                       displayValue = fallback;
                     }
                   } else if (valueLabelMap) {
-                    // Always apply valueLabelMap if present
                     const rawValue = cell.getValue();
                     let key = String(rawValue);
                     if (
@@ -810,7 +788,7 @@ const DataTableInner = <T,>(
                   }
                   return (
                     <td
-                      className="overflow-hidden text-ellipsis "
+                      className="DataTable-cell"
                       key={cell.id}
                       style={{
                         maxWidth:
@@ -828,7 +806,7 @@ const DataTableInner = <T,>(
                       }}
                       title={String(cell.getValue() || '')}
                     >
-                      <span className="truncate text-sm">{displayValue}</span>
+                      <span className="DataTable-cellText">{displayValue}</span>
                     </td>
                   );
                 })}
@@ -838,18 +816,16 @@ const DataTableInner = <T,>(
         </tbody>
       </table>
 
-      {/* No data message */}
       {table.getRowModel().rows.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="DataTable-noDataMessage">
           {noDataComponent || 'No data available'}
         </div>
       )}
 
-      {/* Pagination */}
       {enablePagination && data && data.length > 0 && (
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-700">
+        <div className="DataTable-paginationWrapper">
+          <div className="DataTable-paginationInfo">
+            <span className="DataTable-paginationText">
               Showing{' '}
               {table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
@@ -864,38 +840,38 @@ const DataTableInner = <T,>(
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="DataTable-paginationControls">
             <button
-              className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="DataTable-paginationButton"
               disabled={!table.getCanPreviousPage()}
               onClick={() => table.setPageIndex(0)}
             >
               {'<<'}
             </button>
             <button
-              className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="DataTable-paginationButton"
               disabled={!table.getCanPreviousPage()}
               onClick={() => table.previousPage()}
             >
               {'<'}
             </button>
-            <span className="flex items-center space-x-1">
-              <span className="text-sm">Page</span>
-              <strong className="text-sm">
+            <span className="DataTable-paginationPageInfo">
+              <span className="DataTable-paginationText">Page</span>
+              <strong className="DataTable-paginationText">
                 {' '}
                 {table.getState().pagination.pageIndex + 1} of{' '}
                 {table.getPageCount()}
               </strong>
             </span>
             <button
-              className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="DataTable-paginationButton"
               disabled={!table.getCanNextPage()}
               onClick={() => table.nextPage()}
             >
               {'>'}
             </button>
             <button
-              className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="DataTable-paginationButton"
               disabled={!table.getCanNextPage()}
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             >
@@ -904,7 +880,7 @@ const DataTableInner = <T,>(
           </div>
 
           <select
-            className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="DataTable-paginationSelect"
             onChange={(e) => table.setPageSize(Number(e.target.value))}
             value={table.getState().pagination.pageSize}
           >
