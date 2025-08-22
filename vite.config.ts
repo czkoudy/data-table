@@ -9,6 +9,7 @@ import dts from 'vite-plugin-dts';
 export default defineConfig(() => {
   return {
     build: {
+      cssCodeSplit: false,
       emptyOutDir: true,
       lib: {
         entry: path.resolve(__dirname, './src/lib/index.ts'),
@@ -18,6 +19,16 @@ export default defineConfig(() => {
       rollupOptions: {
         external: ['react', 'react-dom'],
         output: {
+          assetFileNames: (assetInfo) => {
+            if (
+              assetInfo.type === 'asset' &&
+              assetInfo.names &&
+              assetInfo.names[0]?.endsWith('.css')
+            ) {
+              return 'index.css';
+            }
+            return 'assets/[name]-[hash][extname]';
+          },
           globals: {
             react: 'React',
             'react-dom': 'ReactDOM',
