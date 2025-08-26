@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/czkoudy/data-table/compare/v1.0.11...v1.1.0) (2025-08-26)
+
+
+### Bug Fixes
+
+* 🐛 ci github actions ([e68d3ae](https://github.com/czkoudy/data-table/commit/e68d3ae4155b430ec6cd48b4eac4a5406e336708))
+
+
+### Features
+
+* 🎸 change css around ([0431a3a](https://github.com/czkoudy/data-table/commit/0431a3afef3efbe6381abacd7784bf29970ccfec))
+
 ## [1.0.11](https://github.com/czkoudy/data-table/compare/v1.0.10...v1.0.11) (2025-08-22)
 
 
