@@ -1,0 +1,88 @@
+/* Table Header Row Styles */
+.table-header__row {
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  height: 30px;
+}
+
+/* Row Selector Cell */
+.table-header__row-selector {
+  padding: 8px;
+  border-right: 1px solid #e5e7eb;
+}
+
+/* Header Cell Alignment */
+.table-header__cell--align-left {
+  text-align: left;
+}
+
+.table-header__cell--align-center {
+  text-align: center;
+}
+
+.table-header__cell--align-right {
+  text-align: right;
+}
+
+/* Header Content Container */
+.table-header__content {
+  display: flex;
+  align-items: center;
+  padding: 0px 6px;
+  font-weight: 600;
+  font-size: '14px';
+  cursor: default;
+  min-height: 20px;
+  color: #78829d;
+  background-color: #fcfcfc;
+}
+
+.table-header__content--sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.table-header__content--sortable:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+}
+
+.table-header__content--sortable:active {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Content Justification */
+.table-header__content--justify-start {
+  justify-content: flex-start;
+}
+
+.table-header__content--justify-center {
+  justify-content: center;
+}
+
+.table-header__content--justify-end {
+  justify-content: flex-end;
+}
+
+/* Header Text */
+.table-header__text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+/* Sort Icon */
+.table-header__sort-icon {
+  margin-left: 8px;
+  font-size: 12px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.table-header__content--sortable:hover .table-header__sort-icon {
+  opacity: 1;
+}

@@ -13,10 +13,12 @@ import {
   getGroupedRowModel,
   getExpandedRowModel,
 } from '@tanstack/react-table';
-import { format } from 'date-fns';
-import React, { useImperativeHandle, forwardRef } from 'react';
+import React, { useImperativeHandle } from 'react';
 
 import './DataTable.css';
+import TableBodyRow from './components/TableBodyRow/TableBodyRow';
+import TableHeaderRow from './components/TableHeaderRow/TableHeaderRow';
+import TablePagination from './components/TablePagination/TablePagination';
 
 // Column Filter Component
 function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
@@ -27,12 +29,15 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
     return Array.from(values.keys()).sort();
   }, [column]);
 
-  const valueLabelMap: Record<string, string> | undefined =
-    column.columnDef?.meta?.valueLabelMap;
+  const valueLabelMap: Record<string, string> | undefined = (
+    column.columnDef?.meta as DataTableColumnMeta | undefined
+  )?.valueLabelMap;
   const filterValueExcludeList: string[] =
-    column.columnDef?.meta?.filterValueExcludeList || [];
+    (column.columnDef?.meta as DataTableColumnMeta | undefined)
+      ?.filterValueExcludeList || [];
   const filterValueIncludeList: string[] =
-    column.columnDef?.meta?.filterValueIncludeList || [];
+    (column.columnDef?.meta as DataTableColumnMeta | undefined)
+      ?.filterValueIncludeList || [];
 
   const filteredUniqueValues = React.useMemo(() => {
     if (filterValueIncludeList.length > 0) {
@@ -70,7 +75,13 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
   const totalCount = filteredUniqueValues.length;
 
   return (
-    <div className="relative">
+    <div
+      style={{
+        display: 'inline-block',
+        position: 'relative',
+        width: '100%',
+      }}
+    >
       <button
         className="DataTable-filterButton"
         onClick={() => setIsOpen(!isOpen)}
@@ -140,7 +151,7 @@ export interface DataTableColumnMeta {
 
 export interface DataTableProps<T> {
   className?: string;
-  columns: ColumnDef<T, any, any>[];
+  columns: ColumnDef<T, any>[];
   data: T[] | undefined | null;
   defaultColumnFilters?: { id: string; value: string[] }[];
   defaultSorting?: { id: string; desc?: boolean }[];
@@ -168,7 +179,7 @@ export interface DataTableRef {
 const DataTableInner = <T,>(
   props: DataTableProps<T>,
   ref: React.Ref<DataTableRef>
-) => {
+): React.ReactElement => {
   const {
     className = '',
     columns,
@@ -354,7 +365,6 @@ const DataTableInner = <T,>(
           </div>
         </div>
       )}
-
       {enableSearch && (
         <div className="DataTable-globalFilterWrapper">
           <input
@@ -365,75 +375,16 @@ const DataTableInner = <T,>(
           />
         </div>
       )}
-
       <table className={`DataTable-table ${tableClassName}`}>
         <thead>
           {table.getHeaderGroups().map((headerGroup, headerGroupIdx) => (
-            <tr key={headerGroup.id}>
-              {showRowSelectors && (
-                <th
-                  data-disable-row-click="true"
-                  style={{ maxWidth: 36, minWidth: 36, width: 36 }}
-                />
-              )}
-              {headerGroup.headers.map((header) => {
-                const align =
-                  (header.column.columnDef.meta as DataTableColumnMeta)
-                    ?.align || 'left';
-                let alignClass = '';
-                let flexJustify = '';
-                if (align === 'center') {
-                  alignClass = 'DataTable-alignCenter';
-                  flexJustify = 'DataTable-justifyCenter';
-                } else if (align === 'right') {
-                  alignClass = 'DataTable-alignRight';
-                  flexJustify = 'DataTable-justifyEnd';
-                } else {
-                  alignClass = 'DataTable-alignLeft';
-                  flexJustify = 'DataTable-justifyStart';
-                }
-                return (
-                  <th
-                    className={alignClass}
-                    key={header.id}
-                    style={{
-                      maxWidth:
-                        header.getSize() !== 150 ? header.getSize() : undefined,
-                      minWidth:
-                        header.getSize() !== 150 ? header.getSize() : undefined,
-                      width:
-                        header.getSize() !== 150 ? header.getSize() : undefined,
-                    }}
-                  >
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={`DataTable-headerCell ${flexJustify} ${
-                          header.column.getCanSort()
-                            ? 'DataTable-headerCellSortable'
-                            : ''
-                        }`}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        <span>
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                        </span>
-                        {enableSorting && header.column.getCanSort() && (
-                          <span className="DataTable-headerSortIcon">
-                            {{
-                              asc: ' 🔼',
-                              desc: ' 🔽',
-                            }[header.column.getIsSorted() as string] ?? ' ↕️'}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </th>
-                );
-              })}
-            </tr>
+            <TableHeaderRow
+              enableSorting={enableSorting}
+              flexRender={flexRender}
+              headerGroup={headerGroup}
+              key={headerGroup.id}
+              showRowSelectors={showRowSelectors && headerGroupIdx === 0}
+            />
           ))}
           {enableColumnFilters && (
             <tr>
@@ -450,7 +401,7 @@ const DataTableInner = <T,>(
                     key={`filter-${header.id}`}
                   >
                     {header.column.getCanFilter() &&
-                    header.column.columnDef.enableColumnFilter !== false ? (
+                    header.column.columnDef.enableColumnFilter === true ? (
                       <ColumnFilter column={header.column} />
                     ) : null}
                   </th>
@@ -460,447 +411,35 @@ const DataTableInner = <T,>(
           )}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row, index) => {
-            if (row.getIsGrouped()) {
-              const groupValue = row.groupingColumnId
-                ? row.getValue(row.groupingColumnId)
-                : undefined;
-              if (
-                groupValue === undefined ||
-                groupValue === null ||
-                groupValue === ''
-              ) {
-                return row.subRows.map((subRow, subIdx) => (
-                  <tr
-                    className={`DataTable-row ${getRowClassName ? getRowClassName(subRow.original, subIdx) : ''}`}
-                    key={subRow.id}
-                    onClick={(e) => {
-                      const cellElements = Array.from(
-                        (e.currentTarget as HTMLTableRowElement).children
-                      );
-                      for (let i = 0; i < cellElements.length; i++) {
-                        const cell = cellElements[i] as HTMLTableCellElement;
-                        const colDef =
-                          subRow.getVisibleCells()[i]?.column?.columnDef;
-                        if (
-                          (colDef?.meta as DataTableColumnMeta)?.disableRowClick
-                        ) {
-                          if (cell.contains(e.target as Node)) {
-                            return;
-                          }
-                        }
-                      }
-                      onRowClick && onRowClick(subRow.original);
-                    }}
-                  >
-                    {showRowSelectors && (
-                      <td
-                        data-disable-row-click="true"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectRow(
-                            subRow.id,
-                            !selectedRowIds[subRow.id]
-                          );
-                        }}
-                        style={{ maxWidth: 36, minWidth: 36, width: 36 }}
-                      >
-                        <input
-                          checked={!!selectedRowIds[subRow.id]}
-                          onChange={(e) =>
-                            handleSelectRow(subRow.id, e.target.checked)
-                          }
-                          onClick={(e) => e.stopPropagation()}
-                          type="checkbox"
-                        />
-                      </td>
-                    )}
-                    {subRow.getVisibleCells().map((cell, cellIdx) => {
-                      const colDef = cell.column.columnDef;
-                      const valueLabelMap = (
-                        colDef?.meta as DataTableColumnMeta
-                      )?.valueLabelMap;
-                      let displayValue = flexRender(
-                        colDef.cell,
-                        cell.getContext()
-                      );
-                      if (valueLabelMap) {
-                        const rawValue = cell.getValue();
-                        let key = String(rawValue);
-                        if (
-                          rawValue === undefined ||
-                          rawValue === null ||
-                          rawValue === ''
-                        ) {
-                        }
-                        if (valueLabelMap[key] !== undefined) {
-                          displayValue = valueLabelMap[key];
-                        }
-                      }
-                      return (
-                        <td
-                          className="DataTable-cell"
-                          key={cell.id}
-                          style={{
-                            maxWidth:
-                              cell.column.getSize() !== 150
-                                ? cell.column.getSize()
-                                : undefined,
-                            minWidth:
-                              cell.column.getSize() !== 150
-                                ? cell.column.getSize()
-                                : undefined,
-                            width:
-                              cell.column.getSize() !== 150
-                                ? cell.column.getSize()
-                                : undefined,
-                          }}
-                          title={String(cell.getValue() || '')}
-                        >
-                          <span className="DataTable-cellText">
-                            {displayValue}
-                          </span>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ));
-              }
-              const isExpanded = row.getIsExpanded();
-              return (
-                <React.Fragment key={row.id}>
-                  <tr
-                    className="DataTable-row DataTable-groupedRow"
-                    onClick={() => row.toggleExpanded()}
-                  >
-                    <td
-                      className="DataTable-groupedRowCell"
-                      colSpan={row.getVisibleCells().length + 1}
-                    >
-                      <span className="DataTable-groupedRowIcon">
-                        {isExpanded ? '▼' : '▶'}
-                      </span>
-                      {row.groupingColumnId
-                        ? `${row.groupingColumnId}: ${row.getValue(row.groupingColumnId)}`
-                        : 'Group'}{' '}
-                      ({row.subRows.length})
-                    </td>
-                  </tr>
-                  {isExpanded &&
-                    row.subRows.map((subRow, subIdx) =>
-                      subRow.getIsGrouped() ? null : (
-                        <tr
-                          className={`DataTable-row ${getRowClassName ? getRowClassName(subRow.original, subIdx) : ''}`}
-                          key={subRow.id}
-                          onClick={(e) => {
-                            const cellElements = Array.from(
-                              (e.currentTarget as HTMLTableRowElement).children
-                            );
-                            for (let i = 0; i < cellElements.length; i++) {
-                              const cell = cellElements[
-                                i
-                              ] as HTMLTableCellElement;
-                              const colDef =
-                                subRow.getVisibleCells()[i]?.column?.columnDef;
-                              if (
-                                (colDef?.meta as DataTableColumnMeta)
-                                  ?.disableRowClick
-                              ) {
-                                if (cell.contains(e.target as Node)) {
-                                  return;
-                                }
-                              }
-                            }
-                            onRowClick && onRowClick(subRow.original);
-                          }}
-                        >
-                          {showRowSelectors && (
-                            <td
-                              data-disable-row-click="true"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSelectRow(
-                                  subRow.id,
-                                  !selectedRowIds[subRow.id]
-                                );
-                              }}
-                              style={{ maxWidth: 36, minWidth: 36, width: 36 }}
-                            >
-                              <input
-                                checked={!!selectedRowIds[subRow.id]}
-                                onChange={(e) =>
-                                  handleSelectRow(subRow.id, e.target.checked)
-                                }
-                                onClick={(e) => e.stopPropagation()}
-                                type="checkbox"
-                              />
-                            </td>
-                          )}
-                          {subRow.getVisibleCells().map((cell, cellIdx) => {
-                            const colDef = cell.column.columnDef;
-                            const valueLabelMap = (
-                              colDef?.meta as DataTableColumnMeta
-                            )?.valueLabelMap;
-                            let displayValue = flexRender(
-                              colDef.cell,
-                              cell.getContext()
-                            );
-                            if (valueLabelMap) {
-                              const rawValue = cell.getValue();
-                              let key = String(rawValue);
-                              if (
-                                rawValue === undefined ||
-                                rawValue === null ||
-                                rawValue === ''
-                              ) {
-                                key = 'falsy';
-                              }
-                              if (valueLabelMap[key] !== undefined) {
-                                displayValue = valueLabelMap[key];
-                              }
-                            }
-                            return (
-                              <td
-                                className="DataTable-cell"
-                                key={cell.id}
-                                style={{
-                                  maxWidth:
-                                    cell.column.getSize() !== 150
-                                      ? cell.column.getSize()
-                                      : undefined,
-                                  minWidth:
-                                    cell.column.getSize() !== 150
-                                      ? cell.column.getSize()
-                                      : undefined,
-                                  width:
-                                    cell.column.getSize() !== 150
-                                      ? cell.column.getSize()
-                                      : undefined,
-                                }}
-                                title={String(cell.getValue() || '')}
-                              >
-                                <span className="DataTable-cellText">
-                                  {displayValue}
-                                </span>
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      )
-                    )}
-                </React.Fragment>
-              );
-            }
-            return (
-              <tr
-                className={`DataTable-row ${selectedRowIds[row.id] ? 'DataTable-rowSelected' : ''} ${getRowClassName ? getRowClassName(row.original, index) : ''}`}
-                key={row.id}
-                onClick={(e) => {
-                  const cellElements = Array.from(
-                    (e.currentTarget as HTMLTableRowElement).children
-                  );
-                  for (let i = 0; i < cellElements.length; i++) {
-                    const cell = cellElements[i] as HTMLTableCellElement;
-                    let colDef;
-                    if (i === 0) {
-                      const firstCell = row.getVisibleCells()[0];
-                      colDef = firstCell?.column?.columnDef;
-                    } else {
-                      colDef = row.getVisibleCells()[i]?.column?.columnDef;
-                    }
-                    if (
-                      (colDef?.meta as DataTableColumnMeta)?.disableRowClick ||
-                      cell.getAttribute('data-disable-row-click') === 'true'
-                    ) {
-                      if (cell.contains(e.target as Node)) {
-                        return;
-                      }
-                    }
-                  }
-                  onRowClick && onRowClick(row.original);
-                }}
-              >
-                {showRowSelectors && (
-                  <td
-                    data-disable-row-click="true"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSelectRow(row.id, !selectedRowIds[row.id]);
-                    }}
-                    style={{ maxWidth: 36, minWidth: 36, width: 36 }}
-                  >
-                    <input
-                      checked={!!selectedRowIds[row.id]}
-                      onChange={(e) =>
-                        handleSelectRow(row.id, e.target.checked)
-                      }
-                      onClick={(e) => e.stopPropagation()}
-                      type="checkbox"
-                    />
-                  </td>
-                )}
-                {row.getVisibleCells().map((cell, cellIdx) => {
-                  const colDef = cell.column.columnDef;
-                  const valueLabelMap = (colDef?.meta as DataTableColumnMeta)
-                    ?.valueLabelMap;
-                  let displayValue = flexRender(colDef.cell, cell.getContext());
-                  if ((colDef?.meta as DataTableColumnMeta)?.type === 'date') {
-                    const fallback =
-                      (colDef?.meta as DataTableColumnMeta)?.fallback ?? '-';
-                    const date = cell.getValue() as Date | string | null;
-                    let dateObj: Date | null = null;
-                    if (date instanceof Date) {
-                      dateObj = date;
-                    } else if (typeof date === 'string' && date) {
-                      const parsed = new Date(date);
-                      dateObj = isNaN(parsed.getTime()) ? null : parsed;
-                    }
-                    if (!dateObj || dateObj.getTime() === 0) {
-                      displayValue = fallback;
-                    } else if (
-                      dateObj instanceof Date &&
-                      !isNaN(dateObj.getTime())
-                    ) {
-                      const formattedDate = format(
-                        dateObj,
-                        'dd MMM yyyy, HH:mm'
-                      );
-                      displayValue =
-                        formattedDate === '01 Jan 1970, 01:00'
-                          ? fallback
-                          : formattedDate;
-                    } else {
-                      displayValue = fallback;
-                    }
-                  } else if (valueLabelMap) {
-                    const rawValue = cell.getValue();
-                    let key = String(rawValue);
-                    if (
-                      rawValue === undefined ||
-                      rawValue === null ||
-                      rawValue === ''
-                    ) {
-                      key = 'falsy';
-                    }
-                    if (valueLabelMap[key] !== undefined) {
-                      displayValue = valueLabelMap[key];
-                    }
-                  }
-                  return (
-                    <td
-                      className="DataTable-cell"
-                      key={cell.id}
-                      style={{
-                        maxWidth:
-                          cell.column.getSize() !== 150
-                            ? cell.column.getSize()
-                            : undefined,
-                        minWidth:
-                          cell.column.getSize() !== 150
-                            ? cell.column.getSize()
-                            : undefined,
-                        width:
-                          cell.column.getSize() !== 150
-                            ? cell.column.getSize()
-                            : undefined,
-                      }}
-                      title={String(cell.getValue() || '')}
-                    >
-                      <span className="DataTable-cellText">{displayValue}</span>
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
+          {table.getRowModel().rows.map((row, index) => (
+            <TableBodyRow
+              flexRender={flexRender}
+              getRowClassName={getRowClassName}
+              handleSelectRow={handleSelectRow}
+              index={index}
+              key={row.id}
+              onRowClick={onRowClick}
+              row={row}
+              selectedRowIds={selectedRowIds}
+              showRowSelectors={showRowSelectors}
+            />
+          ))}
         </tbody>
       </table>
-
       {table.getRowModel().rows.length === 0 && (
         <div className="DataTable-noDataMessage">
           {noDataComponent || 'No data available'}
         </div>
       )}
-
       {enablePagination && data && data.length > 0 && (
-        <div className="DataTable-paginationWrapper">
-          <div className="DataTable-paginationInfo">
-            <span className="DataTable-paginationText">
-              Showing{' '}
-              {table.getState().pagination.pageIndex *
-                table.getState().pagination.pageSize +
-                1}{' '}
-              to{' '}
-              {Math.min(
-                (table.getState().pagination.pageIndex + 1) *
-                  table.getState().pagination.pageSize,
-                table.getFilteredRowModel().rows.length
-              )}{' '}
-              of {table.getFilteredRowModel().rows.length} results
-            </span>
-          </div>
-
-          <div className="DataTable-paginationControls">
-            <button
-              className="DataTable-paginationButton"
-              disabled={!table.getCanPreviousPage()}
-              onClick={() => table.setPageIndex(0)}
-            >
-              {'<<'}
-            </button>
-            <button
-              className="DataTable-paginationButton"
-              disabled={!table.getCanPreviousPage()}
-              onClick={() => table.previousPage()}
-            >
-              {'<'}
-            </button>
-            <span className="DataTable-paginationPageInfo">
-              <span className="DataTable-paginationText">Page</span>
-              <strong className="DataTable-paginationText">
-                {' '}
-                {table.getState().pagination.pageIndex + 1} of{' '}
-                {table.getPageCount()}
-              </strong>
-            </span>
-            <button
-              className="DataTable-paginationButton"
-              disabled={!table.getCanNextPage()}
-              onClick={() => table.nextPage()}
-            >
-              {'>'}
-            </button>
-            <button
-              className="DataTable-paginationButton"
-              disabled={!table.getCanNextPage()}
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            >
-              {'>>'}
-            </button>
-          </div>
-
-          <select
-            className="DataTable-paginationSelect"
-            onChange={(e) => table.setPageSize(Number(e.target.value))}
-            value={table.getState().pagination.pageSize}
-          >
-            {[10, 20, 30, 40, 50].map((size) => (
-              <option key={size} value={size}>
-                Show {size}
-              </option>
-            ))}
-            <option value={table.getPreFilteredRowModel().rows.length}>
-              Show All
-            </option>
-          </select>
-        </div>
+        <TablePagination table={table} />
       )}
     </div>
   );
 };
 
-const DataTable = forwardRef(DataTableInner) as <T>(
-  p: DataTableProps<T> & { ref?: React.Ref<DataTableRef> }
-) => React.ReactElement;
+const DataTable = React.forwardRef(DataTableInner);
+
+DataTable.displayName = 'DataTable';
 
 export default DataTable;

@@ -1,0 +1,144 @@
+/* Table Body Row Styles */
+.table-body__row {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.table-body__row:hover {
+  background-color: #f9fafb;
+}
+
+.table-body__row--selected {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+}
+
+.table-body__row--selected:hover {
+  background-color: #dbeafe;
+}
+
+/* Grouped Row Styles */
+.table-body__row--grouped {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.table-body__row--grouped:hover {
+  background-color: #e5e7eb;
+}
+
+.table-body__grouped-cell {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.table-body__group-icon {
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 12px;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+.table-body__group-text {
+  color: #111827;
+}
+
+/* Row Selector */
+.table-body__row-selector {
+  padding: 8px;
+  text-align: center;
+  border-right: none;
+  background-color: inherit;
+}
+
+.table-body__checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.table-body__checkbox:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Data Cell */
+.table-body__cell {
+  font-weight: 500;
+  color: #4b5675;
+  vertical-align: middle;
+  border-right: none;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.table-body__cell:last-child {
+  border-right: none;
+}
+
+/* Cell Alignment */
+.table-body__cell--align-left {
+  text-align: left;
+}
+
+.table-body__cell--align-center {
+  text-align: center;
+}
+
+.table-body__cell--align-right {
+  text-align: right;
+}
+
+.table-body__cell-text {
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+  font-size: 12.25px !important;
+}
+
+/* Accessibility */
+.table-body__row:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+.table-body__row--grouped:focus-within {
+  outline-color: #6b7280;
+}
+
+/* Loading/Empty States */
+.table-body__row--loading {
+  background-color: #f9fafb;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.table-body__row--empty {
+  text-align: center;
+  font-style: italic;
+  color: #6b7280;
+}
+
+/* Striped rows option */
+.table-body__row:nth-child(even).table-body__row--striped {
+  background-color: #f9fafb;
+}
+
+.table-body__row:nth-child(even).table-body__row--striped:hover {
+  background-color: #f3f4f6;
+}

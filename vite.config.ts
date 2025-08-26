@@ -4,6 +4,7 @@ import path from 'path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig(() => {
@@ -19,16 +20,6 @@ export default defineConfig(() => {
       rollupOptions: {
         external: ['react', 'react-dom'],
         output: {
-          assetFileNames: (assetInfo) => {
-            if (
-              assetInfo.type === 'asset' &&
-              assetInfo.names &&
-              assetInfo.names[0]?.endsWith('.css')
-            ) {
-              return 'index.css';
-            }
-            return 'assets/[name]-[hash][extname]';
-          },
           globals: {
             react: 'React',
             'react-dom': 'ReactDOM',
@@ -39,9 +30,12 @@ export default defineConfig(() => {
     },
     plugins: [
       react(),
+      cssInjectedByJsPlugin(),
       dts({
         include: ['src/lib/**/*'],
         insertTypesEntry: true,
+        outDir: 'dist',
+        rollupTypes: true,
       }),
     ],
     resolve: {

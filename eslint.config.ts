@@ -127,6 +127,11 @@ export default defineConfig([
       'react/require-default-props': 'off',
       'unused-imports/no-unused-imports': 'error',
     },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
   },
   // tseslint.configs.recommended,
   // pluginReact.configs.flat.recommended,
