@@ -13,9 +13,10 @@ import {
   getGroupedRowModel,
   getExpandedRowModel,
 } from '@tanstack/react-table';
-import React, { useImperativeHandle } from 'react';
 
 import './DataTable.css';
+import React, { useImperativeHandle } from 'react';
+
 import TableBodyRow from './components/TableBodyRow/TableBodyRow';
 import TableHeaderRow from './components/TableHeaderRow/TableHeaderRow';
 import TablePagination from './components/TablePagination/TablePagination';
@@ -78,6 +79,7 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
     <div
       style={{
         display: 'inline-block',
+        paddingRight: '2rem',
         position: 'relative',
         width: '100%',
       }}
@@ -139,7 +141,7 @@ function ColumnFilter<T>({ column }: { column: Column<T, unknown> }) {
   );
 }
 
-export interface DataTableColumnMeta {
+interface DataTableColumnMeta {
   align?: 'left' | 'center' | 'right';
   disableRowClick?: boolean;
   fallback?: string;
@@ -149,7 +151,7 @@ export interface DataTableColumnMeta {
   valueLabelMap?: Record<string, string>;
 }
 
-export interface DataTableProps<T> {
+interface DataTableProps<T> {
   className?: string;
   columns: ColumnDef<T, any>[];
   data: T[] | undefined | null;
@@ -172,7 +174,7 @@ export interface DataTableProps<T> {
   tableClassName?: string;
 }
 
-export interface DataTableRef {
+interface DataTableRef {
   clearSelection: () => void;
 }
 
@@ -438,8 +440,14 @@ const DataTableInner = <T,>(
   );
 };
 
-const DataTable = React.forwardRef(DataTableInner);
+function createForwardRefComponent() {
+  return React.forwardRef(DataTableInner) as <T>(
+    props: DataTableProps<T> & { ref?: React.Ref<DataTableRef> }
+  ) => React.ReactElement;
+}
 
-DataTable.displayName = 'DataTable';
+const DataTable = createForwardRefComponent();
+// const DataTable = React.forwardRef(DataTableInner);
 
 export default DataTable;
+export type { DataTableProps, DataTableRef, DataTableColumnMeta };

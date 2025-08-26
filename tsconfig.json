@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "outDir": "./dist",
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": [

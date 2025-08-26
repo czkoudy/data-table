@@ -4,10 +4,9 @@ import prettier from 'eslint-plugin-prettier';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import unusedImports from 'eslint-plugin-unused-imports';
-import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 
-export default defineConfig([
+export default [
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -127,12 +126,7 @@ export default defineConfig([
       'react/require-default-props': 'off',
       'unused-imports/no-unused-imports': 'error',
     },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
   },
   // tseslint.configs.recommended,
   // pluginReact.configs.flat.recommended,
-]);
+];

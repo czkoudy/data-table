@@ -32,6 +32,8 @@ export default defineConfig(() => {
       react(),
       cssInjectedByJsPlugin(),
       dts({
+        copyDtsFiles: true, // Add this
+        exclude: ['**/*.test.ts', '**/*.stories.ts'], // Exclude test files
         include: ['src/lib/**/*'],
         insertTypesEntry: true,
         outDir: 'dist',
