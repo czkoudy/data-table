@@ -189,10 +189,11 @@ const DataTableInner = <T,>(
     defaultColumnFilters = [],
     defaultSorting = [],
     emptyRows = false,
+    enableAutoResetPageIndex = false,
     enableColumnFilters = false,
     enableFiltering = true,
     enablePagination = true,
-    enableSearch = true,
+    enableSearch = false,
     enableSorting = true,
     getRowClassName,
     grouping,
@@ -250,6 +251,7 @@ const DataTableInner = <T,>(
       getPaginationRowModel: getPaginationRowModel(),
       onPaginationChange: setPagination,
     }),
+    autoResetPageIndex: enableAutoResetPageIndex,
     enableSortingRemoval: false,
     filterFns: {
       multiSelect: (row, columnId, filterValue) => {

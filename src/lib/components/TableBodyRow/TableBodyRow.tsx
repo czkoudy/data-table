@@ -5,6 +5,7 @@ import './TableBodyRow.styles.css';
 // Types
 interface DataTableColumnMeta {
   align?: 'left' | 'center' | 'right';
+  dateFormat?: string;
   disableRowClick?: boolean;
   fallback?: string;
   type?: 'date' | string;
@@ -27,7 +28,7 @@ const DEFAULT_COLUMN_SIZE = 150;
 const ROW_SELECTOR_WIDTH = 36;
 const DEFAULT_DATE_FALLBACK = '-';
 const EPOCH_DATE_FORMATTED = '01 Jan 1970, 01:00';
-const DATE_FORMAT = 'dd MMM yyyy, HH:mm';
+const DEFAULT_DATE_FORMAT = 'dd MMM yyyy, HH:mm';
 
 // Utility functions
 const getColumnStyles = (
@@ -52,7 +53,8 @@ const getValueLabelMapKey = (rawValue: any): string => {
 
 const formatDateValue = (
   value: Date | string | null,
-  fallback: string = DEFAULT_DATE_FALLBACK
+  fallback: string = DEFAULT_DATE_FALLBACK,
+  dateFormat: string = DEFAULT_DATE_FORMAT
 ): string => {
   if (!value) return fallback;
 
@@ -69,7 +71,7 @@ const formatDateValue = (
     return fallback;
   }
 
-  const formattedDate = format(dateObj, DATE_FORMAT);
+  const formattedDate = format(dateObj, dateFormat);
   return formattedDate === EPOCH_DATE_FORMATTED ? fallback : formattedDate;
 };
 
@@ -91,7 +93,8 @@ const getCellDisplayValue = (cell: any, colDef: any, flexRender: any): any => {
 
   if (meta?.type === 'date') {
     const fallback = meta.fallback ?? DEFAULT_DATE_FALLBACK;
-    displayValue = formatDateValue(cell.getValue(), fallback);
+    const dateFormat = meta.dateFormat ?? DEFAULT_DATE_FORMAT;
+    displayValue = formatDateValue(cell.getValue(), fallback, dateFormat);
   } else if (meta?.valueLabelMap) {
     const rawValue = cell.getValue();
     const key = getValueLabelMapKey(rawValue);
