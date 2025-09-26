@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/czkoudy/data-table/compare/v1.1.1...v1.2.0) (2025-09-26)
+
+
+### Features
+
+* 🎸 add staying on page after data refetch ([6733945](https://github.com/czkoudy/data-table/commit/6733945d40a0e4642b96be672bebf6943d516bd4))
+
 ## [1.1.1](https://github.com/czkoudy/data-table/compare/v1.1.0...v1.1.1) (2025-08-26)
 
 
