@@ -14,7 +14,7 @@
 
 .table-body__row--selected {
   background-color: #eff6ff;
-  border-color: #3b82f6;
+  /* border-color: #3b82f6; */
 }
 
 .table-body__row--selected:hover {
@@ -65,10 +65,10 @@
   accent-color: #3b82f6;
 }
 
-.table-body__checkbox:focus {
+/* .table-body__checkbox:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
-}
+} */
 
 /* Data Cell */
 .table-body__cell {
@@ -106,10 +106,10 @@
 }
 
 /* Accessibility */
-.table-body__row:focus-within {
+/* .table-body__row:focus-within {
   outline: 2px solid #3b82f6;
   outline-offset: -2px;
-}
+} */
 
 .table-body__row--grouped:focus-within {
   outline-color: #6b7280;

@@ -153,7 +153,10 @@ interface DataTableColumnMeta {
 }
 
 interface DataTableProps<T> {
-  actionButton?: (selectedRows: T[]) => React.ReactNode;
+  actionButton?: (
+    selectedRows: T[],
+    clearSelection: () => void
+  ) => React.ReactNode;
   className?: string;
   columns: ColumnDef<T, any>[];
   data: T[] | undefined | null;
@@ -392,7 +395,7 @@ const DataTableInner = <T,>(
           <div className="DataTable-actionToolbarText">
             {selectedRows.length} row(s) selected
           </div>
-          {actionButton(selectedRows)}
+          {actionButton(selectedRows, () => setSelectedRowIds({}))}
         </div>
       )}
       <table className={`DataTable-table ${tableClassName}`}>
