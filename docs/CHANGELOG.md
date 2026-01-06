@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/czkoudy/data-table/compare/v1.2.0...v1.2.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* 🐛 add row selection ability ([fff0acb](https://github.com/czkoudy/data-table/commit/fff0acbc50a3eac290f407572960e063423915b7))
+
 # [1.2.0](https://github.com/czkoudy/data-table/compare/v1.1.1...v1.2.0) (2025-09-26)
 
 
