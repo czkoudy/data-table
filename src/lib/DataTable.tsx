@@ -10,6 +10,7 @@ import {
   type ColumnFiltersState,
   type PaginationState,
   type Column,
+  type ExpandedState,
   getGroupedRowModel,
   getExpandedRowModel,
 } from '@tanstack/react-table';
@@ -152,12 +153,14 @@ interface DataTableColumnMeta {
 }
 
 interface DataTableProps<T> {
+  actionButton?: (selectedRows: T[]) => React.ReactNode;
   className?: string;
   columns: ColumnDef<T, any>[];
   data: T[] | undefined | null;
   defaultColumnFilters?: { id: string; value: string[] }[];
   defaultSorting?: { id: string; desc?: boolean }[];
   emptyRows?: boolean;
+  enableAutoResetPageIndex?: boolean;
   enableColumnFilters?: boolean;
   enableFiltering?: boolean;
   enablePagination?: boolean;
@@ -183,6 +186,7 @@ const DataTableInner = <T,>(
   ref: React.Ref<DataTableRef>
 ): React.ReactElement => {
   const {
+    actionButton,
     className = '',
     columns,
     data,
@@ -216,7 +220,7 @@ const DataTableInner = <T,>(
     pageSize: pageSize === 'all' ? data?.length || 1000 : (pageSize as number),
   });
   const [groupingState, setGrouping] = React.useState<string[]>(grouping || []);
-  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const [selectedRowIds, setSelectedRowIds] = React.useState<
     Record<string, boolean>
   >({});
@@ -263,7 +267,11 @@ const DataTableInner = <T,>(
     onExpandedChange: setExpanded,
     ...(enableColumnFilters && {
       defaultColumn: {
-        filterFn: 'multiSelect',
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue || filterValue.length === 0) return true;
+          const cellValue = String(row.getValue(columnId) ?? '');
+          return filterValue.includes(cellValue);
+        },
       },
     }),
     ...(enableColumnFilters && {
@@ -379,15 +387,26 @@ const DataTableInner = <T,>(
           />
         </div>
       )}
+      {showRowSelectors && actionButton && selectedRows.length > 0 && (
+        <div className="DataTable-actionToolbar">
+          <div className="DataTable-actionToolbarText">
+            {selectedRows.length} row(s) selected
+          </div>
+          {actionButton(selectedRows)}
+        </div>
+      )}
       <table className={`DataTable-table ${tableClassName}`}>
         <thead>
           {table.getHeaderGroups().map((headerGroup, headerGroupIdx) => (
             <TableHeaderRow
+              allSelected={allSelected}
               enableSorting={enableSorting}
               flexRender={flexRender}
+              handleSelectAll={handleSelectAll}
               headerGroup={headerGroup}
               key={headerGroup.id}
               showRowSelectors={showRowSelectors && headerGroupIdx === 0}
+              someSelected={someSelected}
             />
           ))}
           {enableColumnFilters && (

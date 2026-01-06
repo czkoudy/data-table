@@ -7,10 +7,13 @@ interface DataTableColumnMeta {
 }
 
 interface TableHeaderRowProps {
+  allSelected?: boolean;
   enableSorting: boolean;
   flexRender: any; // Replace with your actual flexRender type
+  handleSelectAll?: (checked: boolean) => void;
   headerGroup: any; // Replace with your actual header group type
   showRowSelectors: boolean;
+  someSelected?: boolean;
 }
 
 // Constants
@@ -66,7 +69,17 @@ const getSortIcon = (sortDirection: string | false): string => {
 };
 
 // Subcomponents
-const RowSelectorCell: React.FC = () => (
+interface RowSelectorCellProps {
+  allSelected?: boolean;
+  handleSelectAll?: (checked: boolean) => void;
+  someSelected?: boolean;
+}
+
+const RowSelectorCell: React.FC<RowSelectorCellProps> = ({
+  allSelected = false,
+  handleSelectAll,
+  someSelected = false,
+}) => (
   <th
     className="table-header__row-selector"
     data-disable-row-click="true"
@@ -75,7 +88,22 @@ const RowSelectorCell: React.FC = () => (
       minWidth: ROW_SELECTOR_WIDTH,
       width: ROW_SELECTOR_WIDTH,
     }}
-  />
+  >
+    {handleSelectAll && (
+      <input
+        checked={allSelected}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          handleSelectAll(e.target.checked)
+        }
+        ref={(input: HTMLInputElement | null) => {
+          if (input) {
+            input.indeterminate = someSelected;
+          }
+        }}
+        type="checkbox"
+      />
+    )}
+  </th>
 );
 
 interface SortIndicatorProps {
@@ -170,14 +198,23 @@ const HeaderCell: React.FC<HeaderCellProps> = ({
 
 // Main component
 const TableHeaderRow: React.FC<TableHeaderRowProps> = ({
+  allSelected = false,
   enableSorting,
   flexRender,
+  handleSelectAll,
   headerGroup,
   showRowSelectors,
+  someSelected = false,
 }) => {
   return (
     <tr className="table-header__row" key={headerGroup.id}>
-      {showRowSelectors && <RowSelectorCell />}
+      {showRowSelectors && (
+        <RowSelectorCell
+          allSelected={allSelected}
+          handleSelectAll={handleSelectAll}
+          someSelected={someSelected}
+        />
+      )}
       {headerGroup.headers.map((header: any) => (
         <HeaderCell
           enableSorting={enableSorting}
