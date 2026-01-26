@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/czkoudy/data-table/compare/v1.2.2...v1.2.3) (2026-01-26)
+
+
+### Bug Fixes
+
+* 🐛 export ColumnDef so i wont need it from tanstack in cons ([b8f349a](https://github.com/czkoudy/data-table/commit/b8f349a5b7ef914c8958e2a6a7175adaf575c9c6))
+
 ## [1.2.2](https://github.com/czkoudy/data-table/compare/v1.2.1...v1.2.2) (2026-01-06)
 
 
