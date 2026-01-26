@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/czkoudy/data-table/compare/v1.2.3...v1.2.4) (2026-01-26)
+
+
+### Bug Fixes
+
+* 🐛 fix 01 ([c236a8f](https://github.com/czkoudy/data-table/commit/c236a8f2caca940d35ef44821e0298aa7cad0931))
+
 ## [1.2.3](https://github.com/czkoudy/data-table/compare/v1.2.2...v1.2.3) (2026-01-26)
 
 
