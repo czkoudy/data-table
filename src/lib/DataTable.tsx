@@ -474,4 +474,4 @@ const DataTable = createForwardRefComponent();
 // const DataTable = React.forwardRef(DataTableInner);
 
 export default DataTable;
-export type { DataTableProps, DataTableRef, DataTableColumnMeta };
+export type { DataTableProps, DataTableRef, DataTableColumnMeta, ColumnDef };
