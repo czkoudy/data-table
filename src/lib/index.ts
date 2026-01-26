@@ -1,5 +1,3 @@
-import { ColumnDef as TanstackColumnDef } from '@tanstack/react-table';
-
 import DataTable from './DataTable';
 export type {
   DataTableProps,
@@ -8,4 +6,4 @@ export type {
 } from './DataTable';
 export default DataTable;
 
-export type ColumnDef<TData, TValue = any> = TanstackColumnDef<TData, TValue>;
+export type { ColumnDef } from '@tanstack/table-core';
